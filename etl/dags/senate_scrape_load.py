@@ -1,19 +1,17 @@
 import datetime
 import pendulum
-import os
 
-import requests
 from airflow.decorators import dag, task
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.providers.postgres.operators.postgres import PostgresOperator
-
+from airflow.plugins_manager import senate_scraper
 
 @dag(
     'senate_scrape_load',
     schedule_interval="@daily",
     start_date=pendulum.datetime(2021, 1, 1, tz="UTC"),
     catchup=False,
-    dagrun_timeout=datetime.timedelta(minutes=1),
+    dagrun_timeout=datetime.timedelta(minutes=5),
 )
 def Etl():
     
@@ -24,42 +22,15 @@ def Etl():
     )
 
     @task
-    def check_disclosures():        
-        
+    def load_new_disclosures():        
+        senate_disclosures = senate_scraper.get_current_disclosures()
 
         postgres_hook = PostgresHook(postgres_conn_id="postgres_conn")
         conn = postgres_hook.get_conn()
         cur = conn.cursor()
-        with open(data_path, "r") as file:
-            cur.copy_expert(
-                "COPY employees_temp FROM STDIN WITH CSV HEADER DELIMITER AS ',' QUOTE '\"'",
-                file,
-            )
+        cur.executemany("""INSERT INTO bar(file_date, transaction_date, issuer, reporter, transaction_type, transaction_hash, amount, ownership) VALUES (%(file_date)s, %(transaction_date)s, %(issuer)s, %(reporter)s, %(transaction_type)s, %(transaction_hash)s, %(amount)s, %(ownership)s)""", senate_disclosures)        
         conn.commit()
 
-    @task
-    def merge_data():
-        query = """
-            INSERT INTO employees
-            SELECT *
-            FROM (
-                SELECT DISTINCT *
-                FROM employees_temp
-            )
-            ON CONFLICT ("Serial Number") DO UPDATE
-            SET "Serial Number" = excluded."Serial Number";
-        """
-        try:
-            postgres_hook = PostgresHook(postgres_conn_id="tutorial_pg_conn")
-            conn = postgres_hook.get_conn()
-            cur = conn.cursor()
-            cur.execute(query)
-            conn.commit()
-            return 0
-        except Exception as e:
-            return 1
-
-    [create_employees_table, create_employees_temp_table] >> get_data() >> merge_data()
-
+    create_senate_disclosures_table >> load_new_disclosures()
 
 dag = Etl()

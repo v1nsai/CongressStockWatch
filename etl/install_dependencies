@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -e
+
+containers=(etl-airflow-webserver-1 etl-airflow-worker-1 etl-airflow-triggerer-1 etl-airflow-scheduler-1 )
+
+for container in "${containers[@]}"
+do
+    echo "Installing requirements.txt in $container"
+    docker cp requirements.txt $container:/opt/airflow
+    docker exec -it $container python -m pip install -r requirements.txt
+done
