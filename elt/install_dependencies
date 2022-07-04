@@ -1,8 +1,8 @@
 #!/bin/bash
 
-set -e
+# Adds libs from requirements.txt to every docker container
 
-containers=(etl-airflow-webserver-1 etl-airflow-worker-1 etl-airflow-triggerer-1 etl-airflow-scheduler-1 )
+containers=( elt-airflow-webserver-1 elt-airflow-worker-1 elt-airflow-triggerer-1 elt-airflow-scheduler-1 )
 
 for container in "${containers[@]}"
 do

@@ -3,5 +3,9 @@ CREATE TABLE IF NOT EXISTS senate_disclosures (
     transaction_date text not null,
     issuer text not null,
     transaction_type text not null,
-    transaction_hash text not null primary key
+    reporter text not null,
+    amount text not null,
+    ownership text not null,
+    transaction_hash text not null,
+    id serial primary key
 );
