@@ -23,8 +23,8 @@ def Etl():
     )
 
     @task
-    def load_new_disclosures():        
-        senate_disclosures = scraper.get_current_disclosures()
+    def load_new_disclosures():
+        recent_filings = scraper.scrape_first_page()
 
         postgres_hook = PostgresHook(postgres_conn_id="docker_postgres")
         conn = postgres_hook.get_conn()
