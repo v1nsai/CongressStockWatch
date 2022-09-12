@@ -10,13 +10,17 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.common.exceptions import NoSuchElementException
 
 error_timeout = 30
+count = 1
 
-def scrape_current_page():
+def scrape_current_page(driver):
     '''Scrape the next page into a pd.DataFrame'''
 
-    table_inner_html = driver.find_element(By.CSS_SELECTOR, '#filedReports.table.table-striped.dataTable.no-footer').get_attribute('innerHTML').replace('\n', '')
+    table_inner_html = driver.find_element(By.ID, 'filedReports').get_attribute('innerHTML').replace('\n', '')
     table_html = f'<table>{table_inner_html}</table>'
     df = pd.read_html(table_html)[0]
+    global count
+    df.to_csv(f'scraped_pages/page_{count}.csv', index=False)
+    count += 1
     return df
     
 def scrape_all():
@@ -37,7 +41,7 @@ def scrape_all():
     # Parse results on first page to dataframe
     try:
         sleep(1)
-        records = scrape_current_page()
+        records = scrape_current_page(driver)
     except NoSuchElementException:
         print('Failed to get first page')
 
@@ -47,17 +51,20 @@ def scrape_all():
             # Go to next page
             last_page = driver.find_element(By.CSS_SELECTOR, f'a.paginate_button.current')
             last_page_num = int(last_page.text)
-            current_page = last_page.find_element(By.XPATH, f'..').find_element(By.LINK_TEXT, f'{last_page_num}')
+            current_page = last_page.find_element(By.XPATH, f'..').find_element(By.LINK_TEXT, f'{last_page_num + 1}')
             current_page.click()
             print(f'Processing page {current_page.text}')
-            if int(current_page.text) == 5:
-                pass
+            # if int(current_page.text) == 5:
+            #     pass
             sleep(1)
-            df = scrape_current_page()
+            df = scrape_current_page(driver)
             records = pd.concat([records, df], ignore_index=True)
         except NoSuchElementException:
-            print(f'Failed to find page {current_page.text}, likely because the process has reached the last page')
+            print(f'Failed to find page {last_page_num + 1}, likely because the process has reached the last page')
             break
 
-    records.to_csv('senate_dump_07182022.csv', na_rep='', index=False)
+    # records.to_csv('senate_dump_07182022.csv', na_rep='', index=False)
     driver.quit()
+
+scrape_all()
+print()

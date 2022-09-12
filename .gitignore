@@ -105,3 +105,6 @@ dist
 
 # Binary files
 *.pyc
+
+# ELT
+elt/scraped_pages/*
