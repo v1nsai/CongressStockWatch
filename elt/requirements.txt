@@ -1,1 +1,3 @@
-cloudscraper==1.2.60
+pandas
+selenium
+webdriver-manager
