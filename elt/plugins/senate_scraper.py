@@ -1,12 +1,10 @@
 from time import sleep
-from numpy import integer
 
 import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
-# from webdriver_manager.firefox import GeckoDriverManager
 from selenium.common.exceptions import NoSuchElementException
 
 error_timeout = 30
@@ -65,6 +63,7 @@ def scrape_all():
 
     # records.to_csv('senate_dump_07182022.csv', na_rep='', index=False)
     driver.quit()
+    return records
 
 scrape_all()
 print()
