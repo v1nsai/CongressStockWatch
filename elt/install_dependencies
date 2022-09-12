@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Adds libs from requirements.txt to every docker container
+# Adds libs from requirements.txt to every docker container until I feel like figuring out which one(s) are needed
 
 containers=( airflow-airflow-webserver-1 airflow-airflow-worker-1 airflow-airflow-triggerer-1 airflow-airflow-scheduler-1 )
 
