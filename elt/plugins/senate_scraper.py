@@ -1,11 +1,20 @@
-from time import sleep
-
 import pandas as pd
+import logging
+
+from time import sleep
+from xvfbwrapper import Xvfb
+
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chromium.service import ChromiumService
+from selenium.webdriver.chromium.options import ChromiumOptions
 from selenium.webdriver.common.by import By
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.common.exceptions import NoSuchElementException
+from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.core.utils import ChromeType
+
+from selenium.webdriver.firefox.service import Service as FirefoxService
+from webdriver_manager.firefox import GeckoDriverManager
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
 
 error_timeout = 30
 count = 1
@@ -23,8 +32,13 @@ def scrape_current_page(driver):
     
 def scrape_all():
     # init
-    service = Service(executable_path=ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service)
+    # vdisplay = Xvfb()
+    # vdisplay.start()
+    # service = Service(executable_path=ChromeDriverManager().install())
+    options = FirefoxOptions()
+    # options.headless = True
+    driver = webdriver.Firefox(options=options)
+    # driver = webdriver (executable_path=ChromeDriverManager().install(), options=options)
     url = "https://efdsearch.senate.gov/search/"
 
     # Click the checkbox
@@ -38,7 +52,7 @@ def scrape_all():
 
     # Parse results on first page to dataframe
     try:
-        sleep(1)
+        sleep(2)
         records = scrape_current_page(driver)
     except NoSuchElementException:
         print('Failed to get first page')
@@ -52,8 +66,6 @@ def scrape_all():
             current_page = last_page.find_element(By.XPATH, f'..').find_element(By.LINK_TEXT, f'{last_page_num + 1}')
             current_page.click()
             print(f'Processing page {current_page.text}')
-            # if int(current_page.text) == 5:
-            #     pass
             sleep(1)
             df = scrape_current_page(driver)
             records = pd.concat([records, df], ignore_index=True)
@@ -61,9 +73,8 @@ def scrape_all():
             print(f'Failed to find page {last_page_num + 1}, likely because the process has reached the last page')
             break
 
-    # records.to_csv('senate_dump_07182022.csv', na_rep='', index=False)
+    # vdisplay.stop()
     driver.quit()
     return records
 
 scrape_all()
-print()

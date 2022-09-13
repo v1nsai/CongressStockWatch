@@ -24,7 +24,7 @@
 # The following variables are supported:
 #
 # AIRFLOW_IMAGE_NAME           - Docker image name used to run Airflow.
-#                                Default: apache/airflow:2.3.2
+#                                Default: apache/airflow:2.3.4
 # AIRFLOW_UID                  - User ID in Airflow containers
 #                                Default: 50000
 # Those configurations are useful mostly in case of standalone testing/running Airflow in test/try-out mode
@@ -44,14 +44,14 @@ x-airflow-common:
   # In order to add custom dependencies or upgrade provider packages you can use your extended image.
   # Comment the image line, place your Dockerfile in the directory where you placed the docker-compose.yaml
   # and uncomment the "build" line below, Then run `docker-compose build` to build the images.
-  image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.3.2}
+  image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.3.4}
   # build: .
   environment:
     &airflow-common-env
     AIRFLOW__CORE__EXECUTOR: CeleryExecutor
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
     # For backward compatibility, with Airflow <2.3
-    AIRFLOW__CORE__SQL_ ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
     AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
     AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
     AIRFLOW__CORE__FERNET_KEY: ''
@@ -85,8 +85,6 @@ services:
       interval: 5s
       retries: 5
     restart: always
-    ports:
-      - 5432:5432
 
   redis:
     image: redis:latest
@@ -174,7 +172,7 @@ services:
         function ver() {
           printf "%04d%04d%04d%04d" $${1//./ }
         }
-        airflow_version=$$(gosu airflow airflow version)
+        airflow_version=$$(AIRFLOW__LOGGING__LOGGING_LEVEL=INFO && gosu airflow airflow version)
         airflow_version_comparable=$$(ver $${airflow_version})
         min_airflow_version=2.2.0
         min_airflow_version_comparable=$$(ver $${min_airflow_version})
