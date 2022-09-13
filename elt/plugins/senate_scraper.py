@@ -1,19 +1,15 @@
 import pandas as pd
 import logging
 
+from sys import path
 from time import sleep
-from xvfbwrapper import Xvfb
+# from xvfbwrapper import Xvfb
 
 from selenium import webdriver
-from selenium.webdriver.chromium.service import ChromiumService
-from selenium.webdriver.chromium.options import ChromiumOptions
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
-from webdriver_manager.chrome import ChromeDriverManager
-from webdriver_manager.core.utils import ChromeType
 
 from selenium.webdriver.firefox.service import Service as FirefoxService
-from webdriver_manager.firefox import GeckoDriverManager
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 
 error_timeout = 30
@@ -24,22 +20,23 @@ def scrape_current_page(driver):
 
     table_inner_html = driver.find_element(By.ID, 'filedReports').get_attribute('innerHTML').replace('\n', '')
     table_html = f'<table>{table_inner_html}</table>'
+    logging.info(f'table_html = {table_html}')
     df = pd.read_html(table_html)[0]
     global count
-    df.to_csv(f'scraped_pages/page_{count}.csv', index=False)
+    # df.to_csv(f'scraped_pages/page_{count}.csv', index=False)
     count += 1
     return df
     
 def scrape_all():
     # init
-    # vdisplay = Xvfb()
-    # vdisplay.start()
-    # service = Service(executable_path=ChromeDriverManager().install())
     options = FirefoxOptions()
-    # options.headless = True
-    driver = webdriver.Firefox(options=options)
-    # driver = webdriver (executable_path=ChromeDriverManager().install(), options=options)
+    options.headless = True
+    driver_location = 'elt/driver/geckodriver'
+    service = FirefoxService(executable_path=driver_location)
+    path.append('./elt/driver/')
+    driver = webdriver.Firefox(options=options, service=service)
     url = "https://efdsearch.senate.gov/search/"
+    sleep_duration = 3
 
     # Click the checkbox
     driver.get(url)
@@ -52,7 +49,7 @@ def scrape_all():
 
     # Parse results on first page to dataframe
     try:
-        sleep(2)
+        sleep(sleep_duration)
         records = scrape_current_page(driver)
     except NoSuchElementException:
         print('Failed to get first page')
@@ -66,7 +63,7 @@ def scrape_all():
             current_page = last_page.find_element(By.XPATH, f'..').find_element(By.LINK_TEXT, f'{last_page_num + 1}')
             current_page.click()
             print(f'Processing page {current_page.text}')
-            sleep(1)
+            sleep(sleep_duration)
             df = scrape_current_page(driver)
             records = pd.concat([records, df], ignore_index=True)
         except NoSuchElementException:
@@ -75,6 +72,7 @@ def scrape_all():
 
     # vdisplay.stop()
     driver.quit()
-    return records
+    records.to_csv('records.csv', index=None)
+    # return records
 
 scrape_all()
