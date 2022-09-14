@@ -22,7 +22,6 @@ with DAG(
         ti = kwargs['ti']
         ti.xcom_push('senate_records', records)
 
-    @task
     def load_senate(**kwargs):
         ti = kwargs['ti']
         records = ti.xcom_pull(task_ids='scrape', key='senate_records')
@@ -46,9 +45,9 @@ with DAG(
         task_id='scrape_senate',
         python_callable=scrape_senate,
     )
-    load_task = PythonOperator(
+    load_senate_task = PythonOperator(
         task_id='load_senate',
         python_callable=load_senate,
     )
 
-    create_senate_table_task >> load_senate
+    create_senate_table_task >> scrape_senate_task >> load_senate_task

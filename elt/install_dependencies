@@ -6,6 +6,12 @@ set -e
 
 containers=( elt-airflow-webserver-1 elt-airflow-worker-1 elt-airflow-triggerer-1 elt-airflow-scheduler-1 )
 
+fullpath=$(pwd)
+if [ $(basename $(pwd)) == "CongressStockWatch" ]
+then
+    cd elt
+fi
+
 # Download webdriver
 # echo "Grabbing webdriver"
 # mkdir -p driver
