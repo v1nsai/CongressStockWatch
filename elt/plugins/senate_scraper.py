@@ -45,7 +45,7 @@ def scrape_all():
     path.append(driver_location)
     driver = webdriver.Firefox(options=options, service=service)
     url = "https://efdsearch.senate.gov/search/"
-    sleep_duration = 3
+    sleep_duration = 1
 
     # Click the checkbox
     driver.get(url)
@@ -58,6 +58,7 @@ def scrape_all():
 
     # Parse results on first page to dataframe
     try:
+        print('Processing page 1')
         sleep(sleep_duration)
         records = scrape_current_page(driver)
     except NoSuchElementException:
@@ -67,24 +68,22 @@ def scrape_all():
     while True:
         try:
             # Go to next page
-            # last_page = driver.find_element(By.CSS_SELECTOR, f'a.paginate_button.current')
             last_page = wait_for_element(driver, By.CSS_SELECTOR, f'a.paginate_button.current')
             last_page_num = int(last_page.text)
-            # current_page = last_page.find_element(By.XPATH, f'..').find_element(By.LINK_TEXT, f'{last_page_num + 1}')
             current_page = wait_for_element(last_page, By.XPATH, f'..')
             current_page = wait_for_element(current_page, By.LINK_TEXT, f'{last_page_num + 1}')
             current_page.click()
-            # sleep(sleep_duration)
-            print(f'Processing page {current_page.text}')
+            sleep(sleep_duration)
+            current_page_num = int(wait_for_element(driver, By.CSS_SELECTOR, f'a.paginate_button.current').text)
+            print(f'Processing page {current_page_num}')
             df = scrape_current_page(driver)
             records = pd.concat([records, df], ignore_index=True)
         except NoSuchElementException:
             print(f'Failed to find page {last_page_num + 1}, likely because the process has reached the last page')
             break
 
-    # vdisplay.stop()
     driver.quit()
-    records.to_csv('records.csv', index=None)
-    # return records
+    # records.to_csv('records.csv', index=None)
+    return records
 
 scrape_all()
