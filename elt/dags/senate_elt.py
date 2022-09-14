@@ -26,6 +26,8 @@ with DAG(
     def load_senate(**kwargs):
         ti = kwargs['ti']
         records = ti.xcom_pull(task_ids='scrape', key='senate_records')
+        print(records)
+        records = pd.read_csv(records)
 
         postgres_hook = PostgresHook(postgres_conn_id="docker_postgres")
         conn = postgres_hook.get_conn()
@@ -40,7 +42,7 @@ with DAG(
     create_senate_table_task = PostgresOperator(
         task_id="create_senate_table",
         postgres_conn_id="docker_postgres",
-        sql="plugins/sql/senate_disclosures.sql"
+        sql="sql/senate_disclosures.sql"
     )
     scrape_senate_task = PythonOperator(
         task_id='scrape_senate',

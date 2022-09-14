@@ -1,4 +1,4 @@
-CREATE SCHEMA congress;
+CREATE SCHEMA IF NOT EXISTS congress;
 
 CREATE TABLE IF NOT EXISTS congress.senate_disclosures (
     id serial primary key not null,

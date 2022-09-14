@@ -79,6 +79,6 @@ def scrape_all():
 
     driver.quit()
     # records.to_csv('records.csv', index=None)
-    return records
+    return records.to_csv()
 
 # scrape_all()
