@@ -1,13 +1,12 @@
-from asyncio import wait_for
 import pandas as pd
 import logging
 
 from sys import path
 from time import sleep
-# from xvfbwrapper import Xvfb
 
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -18,11 +17,7 @@ error_timeout = 30
 count = 1
 
 def wait_for_element(driver, by, selector):
-    element = driver.find_element(by, selector)
-    if element:
-        return element
-    else:
-        return False
+    return WebDriverWait(driver, 10).until(EC.presence_of_element_located((by, selector)))
 
 def scrape_current_page(driver):
     '''Scrape the next page into a pd.DataFrame'''
@@ -39,8 +34,8 @@ def scrape_all():
     # init
     options = FirefoxOptions()
     options.headless = True
-    driver_location = 'driver/geckodriver'
-    # driver_location = '/opt/airflow/selenium/driver/geckodriver'
+    # driver_location = 'driver/geckodriver'
+    driver_location = '/opt/airflow/selenium/driver/geckodriver'
     service = FirefoxService(executable_path=driver_location)
     path.append(driver_location)
     driver = webdriver.Firefox(options=options, service=service)
@@ -78,7 +73,7 @@ def scrape_all():
             print(f'Processing page {current_page_num}')
             df = scrape_current_page(driver)
             records = pd.concat([records, df], ignore_index=True)
-        except NoSuchElementException:
+        except TimeoutException:
             print(f'Failed to find page {last_page_num + 1}, likely because the process has reached the last page')
             break
 
@@ -86,4 +81,4 @@ def scrape_all():
     # records.to_csv('records.csv', index=None)
     return records
 
-scrape_all()
+# scrape_all()

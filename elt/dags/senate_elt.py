@@ -1,5 +1,6 @@
 import datetime
 import pendulum
+import pandas as pd
 
 from airflow import DAG
 from airflow.decorators import task
@@ -32,14 +33,14 @@ with DAG(
 
         # TODO more efficient insertion
         for line in records.iterrows():
-            cur.executemany(f"INSERT INTO senate_disclosures (first_name, last_name, filer_type, report_type, date_received) VALUES ('{line['first_name']}', '{line['last_name']}', '{line['filer_type']}', '{line['report_type']}', '{line['date_received']}');")    
+            cur.executemany(f"INSERT INTO congress.senate_disclosures (first_name, last_name, filer_type, report_type, date_received) VALUES ('{line['first_name']}', '{line['last_name']}', '{line['filer_type']}', '{line['report_type']}', '{line['date_received']}');")    
         
         conn.commit()
 
     create_senate_table_task = PostgresOperator(
-        task_id="create senate_table",
+        task_id="create_senate_table",
         postgres_conn_id="docker_postgres",
-        sql="sql/senate_disclosures.sql"
+        sql="plugins/sql/senate_disclosures.sql"
     )
     scrape_senate_task = PythonOperator(
         task_id='scrape_senate',

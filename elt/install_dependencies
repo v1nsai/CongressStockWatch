@@ -30,8 +30,8 @@ do
     docker cp driver/geckodriver $container:/opt/airflow/selenium/driver/
     docker exec -it -u root $container chmod +x /opt/airflow/selenium/driver/geckodriver
     docker exec -it -u root $container apt update
-    docker exec -it -u root $container apt install -y xvfb libglib2.0-0 libnss3 libgconf-2-4 libfontconfig1 firefox-esr
-    docker exec -it -u root $container python -m pip install -r requirements.txt
+    docker exec -it -u root $container apt install -y libglib2.0-0 libnss3 libgconf-2-4 libfontconfig1 firefox-esr
+    docker exec -it $container python -m pip install -U -r /opt/airflow/requirements.txt
 done
 
 docker-compose restart
