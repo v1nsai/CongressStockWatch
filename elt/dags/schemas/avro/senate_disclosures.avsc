@@ -1,0 +1,32 @@
+{
+    "namespace": "CongressStocks",
+    "type": "record",
+    "name": "SenateDisclosure",
+    "fields": [
+        {
+            "name": "first_name",
+            "type": ["string"],
+            "aliases": ["First Name (Middle)"]
+        },
+        {
+            "name": "last_name",
+            "type": ["string"],
+            "aliases": ["Last Name (Suffix)"]
+        },
+        {
+            "name": "office",
+            "type": ["string"],
+            "aliases": ["Office (Filer Type)"]
+        },
+        {
+            "name": "report_type",
+            "type": ["string"],
+            "aliases": ["Report Type"]
+        },
+        {
+            "name": "date_received",
+            "type": ["string"],
+            "aliases": ["Date Received/Filed"]
+        }
+    ]
+}

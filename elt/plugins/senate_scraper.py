@@ -1,8 +1,13 @@
+from io import BytesIO, FileIO, StringIO
 import pandas as pd
 import logging
+# import avro.schema
+# import fastavro
+# import json
 
 from sys import path
 from time import sleep
+from avro.io import DatumReader, DatumWriter
 
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
@@ -19,12 +24,37 @@ count = 1
 def wait_for_element(driver, by, selector):
     return WebDriverWait(driver, 10).until(EC.presence_of_element_located((by, selector)))
 
+# def write_to_schema(df):
+#     '''Validates the data then writes it to the schema or throws an error'''
+
+#     # Validate data against the schema
+#     # schema = fastavro.schema.load_schema('schemas/avro/senate_disclosures.avsc')
+#     # fastavro.validate(datum=df, schema=schema, raise_errors=True)
+    
+#     # Convert to json, write to avro
+#     df_out = pd.DataFrame()
+#     for line in df.iterrows():
+#         pd.concat(df_out, line)
+
+#     schema = fastavro.schema.load_schema('schemas/avro/senate_disclosures.avsc')
+#     buffer = BytesIO()
+#     data_json = json.loads(df.to_json(orient='records'))
+#     fastavro.writer(fo=buffer, schema=schema, records=data_json, validator=True)
+#     records = []
+#     buffer.seek(0)
+#     for record in fastavro.reader(buffer):
+#         records.append(record)
+#         print()
+#     output = pd.read_json(records)
+#     return output    
+
 def scrape_current_page(driver):
     '''Scrape the next page into a pd.DataFrame'''
 
     table_inner_html = driver.find_element(By.ID, 'filedReports').get_attribute('innerHTML').replace('\n', '')
     table_html = f'<table>{table_inner_html}</table>'
     df = pd.read_html(table_html)[0]
+    # write_to_schema(df)
     global count
     # df.to_csv(f'scraped_pages/page_{count}.csv', index=False)
     count += 1
@@ -81,4 +111,4 @@ def scrape_all():
     # records.to_csv('records.csv', index=None)
     return records.to_csv()
 
-# scrape_all()
+scrape_all()
