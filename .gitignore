@@ -110,3 +110,4 @@ dist
 elt/scraped_pages/*
 elt/driver/*
 elt/records.csv
+elt/dags/records.csv

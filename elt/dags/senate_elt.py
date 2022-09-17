@@ -38,9 +38,7 @@ with DAG(
 
         # TODO more efficient insertion
         for line in records.iterrows():
-            print(line)
             line = line[1]
-            # cur.executemany(f"INSERT INTO congress.senate_disclosures (first_name, last_name, filer_type, report_type, date_received) VALUES ('{line['first_name']}', '{line['last_name']}', '{line['filer_type']}', '{line['report_type']}', '{line['date_received']}');")
             cur.execute(f"INSERT INTO congress.senate_disclosures (first_name, last_name, filer_type, report_type, date_received) VALUES ('{line['First Name (Middle)']}', '{line['Last Name (Suffix)']}', '{line['Office (Filer Type)']}', '{line['Report Type']}', '{line['Date Received/Filed']}');")
         
         conn.commit()

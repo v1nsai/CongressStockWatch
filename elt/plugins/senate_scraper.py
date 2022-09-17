@@ -64,8 +64,8 @@ def scrape_all():
     # init
     options = FirefoxOptions()
     options.headless = True
-    # driver_location = 'driver/geckodriver'
-    driver_location = '/opt/airflow/selenium/driver/geckodriver'
+    driver_location = 'driver/geckodriver'
+    # driver_location = '/opt/airflow/selenium/driver/geckodriver'
     service = FirefoxService(executable_path=driver_location)
     path.append(driver_location)
     driver = webdriver.Firefox(options=options, service=service)
@@ -74,12 +74,12 @@ def scrape_all():
 
     # Click the checkbox
     driver.get(url)
-    driver.find_element(By.ID, 'agree_statement').click()
+    wait_for_element(driver, By.ID, 'agree_statement').click()
 
     # Send the request
-    driver.find_element(By.CSS_SELECTOR, '#filerTypes.form-check-input.senator_filer').click()
-    driver.find_element(By.ID, 'fromDate').send_keys('01/01/2022')
-    driver.find_element(By.CSS_SELECTOR, '.btn.btn-primary').click()
+    wait_for_element(driver, By.CSS_SELECTOR, '#filerTypes.form-check-input.senator_filer').click()
+    wait_for_element(driver, By.ID, 'fromDate').send_keys('01/01/2022')
+    wait_for_element(driver, By.CSS_SELECTOR, '.btn.btn-primary').click()
 
     # Parse results on first page to dataframe
     try:
@@ -110,5 +110,6 @@ def scrape_all():
     driver.quit()
     # records.to_csv('records.csv', index=None)
     return records.to_csv()
+    # print(records.to_csv())
 
-scrape_all()
+# scrape_all()
