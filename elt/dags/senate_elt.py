@@ -1,9 +1,8 @@
 import datetime
-import json
 import pendulum
 import pandas as pd
 
-from io import BytesIO, StringIO
+from io import StringIO
 
 from airflow import DAG
 from airflow.decorators import task

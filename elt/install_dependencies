@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Adds libs from requirements.txt to every docker container until I feel like figuring out which one(s) actually need them
+# Adds required packages to every docker container until I feel like figuring out which one(s) actually need them
 
 set -e
 
@@ -13,25 +13,34 @@ then
 fi
 
 # Download webdriver
-# echo "Grabbing webdriver"
-# mkdir -p driver
-# cd driver
-# wget https://github.com/mozilla/geckodriver/releases/download/v0.31.0/geckodriver-v0.31.0-linux64.tar.gz
-# tar -xvzf geckodriver*
-# chmod +x geckodriver
-# cd ..
+if ! [ -f 'driver/geckodriver' ]; then
+    echo "Downloading webdriver..."
+    mkdir -p driver
+    cd driver
+    wget https://github.com/mozilla/geckodriver/releases/download/v0.31.0/geckodriver-v0.31.0-linux64.tar.gz
+    tar -xvzf geckodriver*
+    chmod +x geckodriver
+    cd ..
+else
+    echo "Geckodriver found, skipping download"
+fi
 
 # Install required python packages, system packages and webdriver
 for container in "${containers[@]}"
 do
-    echo "Installing requirements.txt in $container"
+    echo "Copying files to $container"
     docker exec -it -u root $container mkdir -p /opt/airflow/selenium/driver/
-    docker cp requirements.txt $container:/opt/airflow
     docker cp driver/geckodriver $container:/opt/airflow/selenium/driver/
+    docker cp requirements.txt $container:/opt/airflow
     docker exec -it -u root $container chmod +x /opt/airflow/selenium/driver/geckodriver
+
+    echo "Installing system packages in container $container."
     docker exec -it -u root $container apt update
     docker exec -it -u root $container apt install -y libglib2.0-0 libnss3 libgconf-2-4 libfontconfig1 firefox-esr
+
+    echo "Installing Python packages in container $container"
     docker exec -it $container python -m pip install -U -r /opt/airflow/requirements.txt
 done
 
+echo "Restarting all containers..."
 docker-compose restart

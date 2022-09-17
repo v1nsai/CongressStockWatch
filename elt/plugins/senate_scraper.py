@@ -1,9 +1,4 @@
-from io import BytesIO, FileIO, StringIO
 import pandas as pd
-import logging
-# import avro.schema
-# import fastavro
-# import json
 
 from sys import path
 from time import sleep
@@ -54,10 +49,12 @@ def scrape_current_page(driver):
     table_inner_html = driver.find_element(By.ID, 'filedReports').get_attribute('innerHTML').replace('\n', '')
     table_html = f'<table>{table_inner_html}</table>'
     df = pd.read_html(table_html)[0]
+    
     # write_to_schema(df)
-    global count
+
+    # global count
     # df.to_csv(f'scraped_pages/page_{count}.csv', index=False)
-    count += 1
+    # count += 1
     return df
     
 def scrape_all():
@@ -99,6 +96,8 @@ def scrape_all():
             current_page = wait_for_element(current_page, By.LINK_TEXT, f'{last_page_num + 1}')
             current_page.click()
             sleep(sleep_duration)
+
+            # Scrape current page
             current_page_num = int(wait_for_element(driver, By.CSS_SELECTOR, f'a.paginate_button.current').text)
             print(f'Processing page {current_page_num}')
             df = scrape_current_page(driver)
@@ -108,8 +107,6 @@ def scrape_all():
             break
 
     driver.quit()
-    # records.to_csv('records.csv', index=None)
     return records.to_csv()
-    # print(records.to_csv())
 
 # scrape_all()
