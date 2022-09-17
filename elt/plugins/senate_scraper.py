@@ -64,8 +64,8 @@ def scrape_all():
     # init
     options = FirefoxOptions()
     options.headless = True
-    driver_location = 'driver/geckodriver'
-    # driver_location = '/opt/airflow/selenium/driver/geckodriver'
+    # driver_location = 'driver/geckodriver'
+    driver_location = '/opt/airflow/selenium/driver/geckodriver'
     service = FirefoxService(executable_path=driver_location)
     path.append(driver_location)
     driver = webdriver.Firefox(options=options, service=service)
