@@ -1,23 +1,24 @@
-#!/bin/bash
+#!/bin/zsh
 
 # Adds required packages to every docker container until I feel like figuring out which one(s) actually need them
 
 set -e
 
-containers=( elt-airflow-webserver-1 elt-airflow-worker-1 elt-airflow-triggerer-1 elt-airflow-scheduler-1 )
+containers=( etl_airflow-webserver_1 etl_airflow-worker_1 etl_airflow-triggerer_1 etl_airflow-scheduler_1) 
 
 fullpath=$(pwd)
-if [ $(basename $(pwd)) == "CongressStockWatch" ]
+if [ $(basename $(pwd)) "==" "CongressStockWatch" ]
 then
-    cd elt
+    cd etl
 fi
 
 # Download webdriver
-if ! [ -f 'driver/geckodriver' ]; then
+if ! [ -f 'driver/geckodriver' ];
+then
     echo "Downloading webdriver..."
     mkdir -p driver
     cd driver
-    wget https://github.com/mozilla/geckodriver/releases/download/v0.31.0/geckodriver-v0.31.0-linux64.tar.gz
+    curl -OL https://github.com/mozilla/geckodriver/releases/download/v0.31.0/geckodriver-v0.31.0-linux64.tar.gz
     tar -xvzf geckodriver*
     chmod +x geckodriver
     cd ..
